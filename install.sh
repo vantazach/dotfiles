@@ -5,7 +5,7 @@ set -euo pipefail
 
 dotfiles_dir="$(dirname "$(readlink -f "$0")")"
 
-for script in glean-mcp.sh gws-install.sh slack-share.sh; do
+for script in acli-install.sh glean-mcp.sh gws-install.sh slack-share.sh; do
     path="$dotfiles_dir/$script"
     for rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
         if ! grep -qsF "$path" "$rc"; then
