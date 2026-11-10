@@ -1,23 +1,15 @@
-# not really needed since I'm not installing additional scripts
-#!/bin/bash
+#!/usr/bin/env bash
+# Ona runs this once when an environment is created. It hooks jira-login.sh
+# into shell startup so acli is logged in again after every restart.
+set -euo pipefail
 
-# Needed to default to zsh shell when SSH'ing in
-sudo chsh "$(id -un)" --shell "/usr/bin/zsh"
+login_script="$(dirname "$(readlink -f "$0")")/jira-login.sh"
 
-create_symlinks() {
-    # Get the directory in which this script lives.
-    script_dir=$(dirname "$(readlink -f "$0")")
+for rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
+    if ! grep -qsF "$login_script" "$rc"; then
+        printf '\n# Jira login (once per boot)\n[ -f "%s" ] && . "%s"\n' \
+            "$login_script" "$login_script" >>"$rc"
+    fi
+done
 
-    # Get a list of all files in this directory that start with a dot.
-    files=$(find -maxdepth 1 -type f -name ".*")
-
-    # Create a symbolic link to each file in the home directory.
-    for file in $files; do
-        name=$(basename $file)
-        echo "Creating symlink to $name in home directory."
-        rm -rf ~/$name
-        ln -s $script_dir/$name ~/$name
-    done
-}
-
-create_symlinks
+bash "$login_script"
